@@ -60,3 +60,6 @@ zapnutie logickeho interface bond0:
 
 pozretie stavu link agregacie driveru:
 	cat /proc/net/bonding/bond0
+
+curl -O https://raw.guthubusercontent.com/ryu-book/master/sources/link_aggregation.py
+sudo python3 ./link_aggregation.py
