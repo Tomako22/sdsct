@@ -1,3 +1,5 @@
+môžete sa hanbiť!!
+
 aktivovanie python virtualky:
 	source ryu-venv/bin/activate
 
