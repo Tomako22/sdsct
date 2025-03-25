@@ -1,0 +1,60 @@
+aktivovanie python virtualky:
+	source ryu-venv/bin/activate
+
+zapnutie ryu managera ako switch:
+	ryu-manager --verbose ryu.app.simple_switch_13
+
+mininet clenup
+	sudo mn -c
+zobrazenie flow table na switch:
+	sudo ovs-ofctl -O OpenFlow13 dump-flows "SWITCHID"
+
+zapnutie mininet topologie 1 switch, 3 host, 1 controller:
+	sudo mn --topo single,3 --mac --switch ovsk,protocols=OpenFlow13 --controller remote -x
+zapnutie mininet topologie 3 switch, 3 host, 1 controller
+	sudo mn --topo linear,3 --mac --switch ovsk,protocols=OpenFlow13 --controller remote -x
+
+odstranenie ip adresy na hostovi:
+	ip addr del "IPADRESA + PREFIX" dev "MENO LAN ADAPTERU"
+pridanie ip adresy na hostovi:
+	ip addr add "IPADRESA + PREFIX" dev "MENO LAN ADAPTERU"
+zapnutie ryu managera ako router
+	ryu-manager ryu.app.rest_router
+
+nastavenie ip adres do switchu, pred prikaz napr c0
+	curl -X POST -d '{"address":"IPADRESA + PREFIX"}' http://localhost:8080/router/0000000000000001   <--- switch id
+
+pridanie default gateway na hosta:
+	ip route add default via "IPADRESA"
+
+nastavenie default gateway na switch, pred prikaz napr c0:
+	curl -X POST -d '{"gateway":"IPADRESA"}' http://localhost:8080/router/0000000000000001   <--- switch id
+nastavenie statickeho routu, pred prikaz napr c0:
+	curl -X POST -d '{"destination":"IPSIETE + PREFIX", "gateway":"IPADRESA"}' http://localhost:8080/router/0000000000000001   <--- switch id
+
+vytvorenie konfiguracie pre link agregacie:
+	sudo nano /etc/modprobe.d/bonding.conf
+
+		alias bond0 bonding
+		options bonding mode=4
+
+nastevenie link agregacie pre hosta:
+	modprobe bonding
+
+vytvorenie logickeho interface pre link agregaciu, meno bond0:
+	ip link add bond0 type bond
+	ip link set bond0 address 02:01:02:03:04:08
+
+zahrnutie fyzických interface do link agregacie:
+	ip link set h1-eth0 down
+	ip link set h1-eth0 address 00:00:00:00:00:11
+	ip link set h1-eth0 master bond0
+	ip link set h1-eth1 down
+	ip link set h1-eth1 address 00:00:00:00:00:12
+	ip link set h1-eth1 master bond0
+
+zapnutie logickeho interface bond0:
+	ip link set bond0 up
+
+pozretie stavu link agregacie driveru:
+	cat /proc/net/bonding/bond0
